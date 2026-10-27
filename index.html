@@ -2,191 +2,293 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Empire - Liquidity Tycoon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crypto Empire - Ultimate Tycoon</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-        body { font-family: 'Cairo', sans-serif; background-color: #0b0f19; color: #ffffff; user-select: none; }
-        .glow-btn { box-shadow: 0 0 25px rgba(16, 185, 129, 0.4); transition: transform 0.1s ease; }
-        .glow-btn:active { transform: scale(0.93); }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); color: #ffffff; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .neon-glow { box-shadow: 0 0 35px rgba(16, 185, 129, 0.35); }
+        .coin-btn { transition: transform 0.05s ease; }
+        .coin-btn:active { transform: scale(0.90); }
         @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-70px) scale(1.2); }
-        .floating-num { position: absolute; pointer-events: none; font-weight: 900; color: #34d399; font-size: 1.5rem; text-shadow: 0 0 10px rgba(52, 211, 153, 0.8); animation: floatUp 0.8s ease-out forwards; }
+            0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.4) rotate(15deg); }
+        }
+        .floating-text { position: absolute; pointer-events: none; font-weight: 900; color: #34d399; font-size: 1.8rem; text-shadow: 0 0 15px rgba(52, 211, 153, 0.9); animation: floatUp 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 50; }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.05); }
+        }
+        .pulse-bg { animation: pulseGlow 3s infinite ease-in-out; }
     </style>
 </head>
-<body class="flex flex-col h-screen justify-between overflow-hidden max-w-md mx-auto relative border-x border-gray-800">
+<body class="flex flex-col h-screen justify-between max-w-md mx-auto relative overflow-hidden border-x border-slate-800">
 
-    <!-- Header -->
-    <header class="flex justify-between items-center p-4 bg-gray-900/80 backdrop-blur border-b border-gray-800">
-        <div>
-            <p class="text-xs text-gray-400">الرصيد المتاح</p>
-            <h1 class="text-xl font-black text-emerald-400" id="balance">USDT 0.00</h1>
+    <!-- Top Stats Header -->
+    <header class="flex justify-between items-center p-4 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 z-20">
+        <div class="flex items-center space-x-3 space-x-reverse">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xl">💎</div>
+            <div>
+                <p class="text-[10px] text-slate-400 font-semibold">إجمالي السيولة</p>
+                <h1 class="text-xl font-black text-emerald-400 tracking-wide" id="balance">0.00 USDT</h1>
+            </div>
         </div>
         <div class="text-left">
-            <p class="text-xs text-gray-400">إمبراطورية الكريプト</p>
-            <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30 font-semibold" id="node-level">Tycoon Node I</span>
+            <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30 font-bold" id="rank-title">مبتدئ كربتو</span>
         </div>
     </header>
 
-    <!-- Main Game Area -->
-    <main class="flex-1 flex flex-col items-center justify-center p-4 relative" id="main-view">
-        <div class="text-center mb-4">
-            <p class="text-xs text-gray-400">الدخل السلبي (في الثانية):</p>
-            <span class="text-lg font-bold text-purple-400" id="passive-income">+0.00 USDT / ثانية</span>
+    <!-- Main Game View -->
+    <main class="flex-1 flex flex-col items-center justify-between p-4 relative overflow-y-auto" id="view-main">
+        <div class="text-center mt-2">
+            <p class="text-xs text-slate-400">الدخل التلقائي (في الثانية)</p>
+            <span class="text-lg font-black text-purple-400 tracking-wider" id="passive-income">+0.00 USDT/s</span>
         </div>
 
-        <!-- Clicker Button Container -->
-        <div class="relative flex items-center justify-center my-6">
-            <div class="absolute w-56 h-56 rounded-full bg-emerald-500/10 animate-ping"></div>
-            <button id="tap-btn" onclick="tapCoin(event)" class="w-48 h-48 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 glow-btn flex flex-col items-center justify-center border-4 border-emerald-400/50 cursor-pointer relative z-10">
-                <span class="text-4xl mb-1">⚡</span>
-                <span class="text-xl font-black tracking-wider">اضخ سيولة</span>
-                <span class="text-xs text-emerald-100 mt-1" id="tap-power">+1.00 طاقة</span>
+        <!-- Central Clicker Button -->
+        <div class="relative flex items-center justify-center my-auto">
+            <div class="absolute w-64 h-64 rounded-full bg-emerald-500/15 pulse-bg pointer-events-none"></div>
+            <button id="tap-btn" onclick="tapAction(event)" class="w-52 h-52 rounded-full bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 neon-glow coin-btn flex flex-col items-center justify-center border-4 border-emerald-300/60 cursor-pointer relative z-10 shadow-2xl">
+                <span class="text-5xl mb-1 filter drop-shadow">⚡</span>
+                <span class="text-2xl font-black tracking-wider text-white">اضخ سيولة</span>
+                <span class="text-xs text-emerald-100 font-bold mt-1 bg-black/20 px-3 py-0.5 rounded-full" id="tap-power-label">+1.00 نقرة</span>
             </button>
         </div>
 
-        <!-- Energy Bar -->
-        <div class="w-3/4 bg-gray-800 rounded-full h-3 p-0.5 border border-gray-700 mt-4">
-            <div id="energy-bar" class="bg-gradient-to-r from-teal-400 to-emerald-400 h-full rounded-full transition-all duration-200" style="width: 100%;"></div>
+        <!-- Energy Bar & Status -->
+        <div class="w-full px-4 mb-2">
+            <div class="flex justify-between text-xs text-slate-400 mb-1 font-semibold">
+                <span>⚡ طاقة الخادم</span>
+                <span><span id="current-energy">1000</span> / <span id="max-energy">1000</span></span>
+            </div>
+            <div class="w-full bg-slate-800/80 rounded-full h-3.5 p-0.5 border border-slate-700">
+                <div id="energy-bar" class="bg-gradient-to-r from-teal-400 to-emerald-400 h-full rounded-full transition-all duration-200" style="width: 100%;"></div>
+            </div>
         </div>
-        <p class="text-xs text-gray-400 mt-1"><span id="current-energy">1000</span> / <span id="max-energy">1000</span> الطاقة</p>
     </main>
 
-    <!-- Upgrades View (Hidden by default) -->
-    <div id="upgrades-view" class="flex-1 p-4 overflow-y-auto hidden">
-        <h2 class="text-lg font-bold mb-3 text-emerald-400">متجر الترقيات والسيولة</h2>
-        <div class="space-y-3">
-            <div class="bg-gray-900/90 border border-gray-800 p-3 rounded-xl flex justify-between items-center">
-                <div>
-                    <h3 class="font-bold text-sm">عامل تعدين أوتوماتيكي</h3>
-                    <p class="text-xs text-gray-400">يولد +0.5 USDT / ثانية</p>
-                    <p class="text-xs text-emerald-400 mt-1">السعر: <span id="cost-1">15.00</span> USDT</p>
-                </div>
-                <button onclick="buyUpgrade(1)" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-2 rounded-lg font-bold">ترقية</button>
-            </div>
-            <div class="bg-gray-900/90 border border-gray-800 p-3 rounded-xl flex justify-between items-center">
-                <div>
-                    <h3 class="font-bold text-sm">خادم ذكاء اصطناعي كمومي</h3>
-                    <p class="text-xs text-gray-400">يولد +3.0 USDT / ثانية</p>
-                    <p class="text-xs text-emerald-400 mt-1">السعر: <span id="cost-2">100.00</span> USDT</p>
-                </div>
-                <button onclick="buyUpgrade(2)" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-2 rounded-lg font-bold">ترقية</button>
-            </div>
+    <!-- Upgrades View -->
+    <div id="view-upgrades" class="flex-1 p-4 overflow-y-auto hidden space-y-3 z-10">
+        <h2 class="text-lg font-black text-emerald-400 mb-2">🚀 متجر ترقيات الإمبراطورية</h2>
+        <div id="upgrades-list" class="space-y-3 pb-20">
+            <!-- Dynamically populated via JS -->
         </div>
     </div>
 
-    <!-- Friends View (Hidden by default) -->
-    <div id="friends-view" class="flex-1 p-4 overflow-y-auto hidden text-center">
-        <h2 class="text-lg font-bold mb-2 text-emerald-400">دعوة الأصدقاء</h2>
-        <p class="text-xs text-gray-400 mb-4">ادع أصدقاءك واحصل على 10% من أرباح السيولة الخاصة بهم فوراً!</p>
-        <button onclick="inviteFriend()" class="bg-gradient-to-r from-blue-600 to-indigo-600 w-full py-3 rounded-xl font-bold shadow-lg">مشاركة رابط الإحالة</button>
+    <!-- Quests & Earn View -->
+    <div id="view-quests" class="flex-1 p-4 overflow-y-auto hidden space-y-3 z-10">
+        <h2 class="text-lg font-black text-emerald-400 mb-2">🎯 المهام والمكافآت اليومية</h2>
+        <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex justify-between items-center shadow-lg">
+            <div>
+                <h3 class="font-bold text-sm text-white">تسجيل الدخول اليومي</h3>
+                <p class="text-xs text-slate-400 mt-0.5">احصل على مكافأة مجانية فورية!</p>
+                <p class="text-xs text-emerald-400 font-bold mt-1">+50.00 USDT</p>
+            </div>
+            <button onclick="claimDaily()" id="daily-btn" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-2.5 rounded-xl font-bold shadow-md cursor-pointer">استلام</button>
+        </div>
+        <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex justify-between items-center shadow-lg">
+            <div>
+                <h3 class="font-bold text-sm text-white">دعوة أصدقاء</h3>
+                <p class="text-xs text-slate-400 mt-0.5">اكسب 20% من أرباح أصدقائك للأبد</p>
+            </div>
+            <button onclick="inviteFriend()" class="bg-blue-600 hover:bg-blue-500 text-xs px-4 py-2.5 rounded-xl font-bold shadow-md cursor-pointer">مشاركة</button>
+        </div>
     </div>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="grid grid-cols-3 bg-gray-900 border-t border-gray-800 py-2 text-center text-xs">
-        <button onclick="switchTab('friends')" id="nav-friends" class="text-gray-400 hover:text-emerald-400 flex flex-col items-center">
-            <span class="text-lg mb-0.5">👥</span> الأصدقاء
+    <nav class="grid grid-cols-3 bg-slate-900/95 border-t border-slate-800/80 py-2.5 text-center text-xs backdrop-blur z-20">
+        <button onclick="switchTab('quests')" id="nav-quests" class="text-slate-400 hover:text-emerald-400 flex flex-col items-center transition-colors">
+            <span class="text-xl mb-0.5">🎯</span> المهام
         </button>
-        <button onclick="switchTab('upgrades')" id="nav-upgrades" class="text-gray-400 hover:text-emerald-400 flex flex-col items-center">
-            <span class="text-lg mb-0.5">🚀</span> الترقيات
+        <button onclick="switchTab('upgrades')" id="nav-upgrades" class="text-slate-400 hover:text-emerald-400 flex flex-col items-center transition-colors">
+            <span class="text-xl mb-0.5">🚀</span> الترقيات
         </button>
-        <button onclick="switchTab('main')" id="nav-main" class="text-emerald-400 font-bold flex flex-col items-center">
-            <span class="text-lg mb-0.5">🪙</span> الخزينة
+        <button onclick="switchTab('main')" id="nav-main" class="text-emerald-400 font-bold flex flex-col items-center transition-colors">
+            <span class="text-xl mb-0.5">⚡</span> الخزينة
         </button>
     </nav>
 
     <script>
-        let balance = 61.50;
-        let passiveIncome = 0.50;
-        let tapPower = 1.00;
-        let energy = 1000;
-        let maxEnergy = 1000;
-        
-        let upgrades = {
-            1: { cost: 15.00, power: 0.50, count: 0 },
-            2: { cost: 100.00, power: 3.00, count: 0 }
+        // Game State Core
+        let game = {
+            balance: 100.00,
+            passiveIncome: 1.00,
+            tapPower: 1.00,
+            energy: 1000,
+            maxEnergy: 1000,
+            lastSave: Date.now()
         };
 
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        // Upgrades Configuration
+        let upgradesData = [
+            { id: 0, name: "خادم تعدين محلي", desc: "يولد +0.5 USDT/s", cost: 20.00, power: 0.5, count: 0, mult: 1.4 },
+            { id: 1, name: "عامل ذكاء اصطناعي", desc: "يولد +2.5 USDT/s", cost: 120.00, power: 2.5, count: 0, mult: 1.45 },
+            { id: 2, name: "عقدة بلوكتشين كمومية", desc: "يولد +12.0 USDT/s", cost: 750.00, power: 12.0, count: 0, mult: 1.5 },
+            { id: 3, name: "مجمع السيولة العملاق", desc: "يولد +50.0 USDT/s", cost: 3500.00, power: 50.0, count: 0, mult: 1.55 }
+        ];
 
-        function tapCoin(event) {
-            if (energy < 1) return;
-            energy -= 1;
-            balance += tapPower;
+        // Load Saved Game
+        if (localStorage.getItem('crypto_empire_save')) {
+            try {
+                let saved = JSON.parse(localStorage.getItem('crypto_empire_save'));
+                game = { ...game, ...saved };
+                let upgradesSaved = JSON.parse(localStorage.getItem('crypto_empire_upgrades'));
+                if (upgradesSaved) upgradesData = upgradesSaved;
+                
+                // Offline earnings calculation
+                let elapsed = (Date.now() - game.lastSave) / 1000;
+                if (elapsed > 5 && game.passiveIncome > 0) {
+                    let offlineReward = elapsed * game.passiveIncome;
+                    game.balance += offlineReward;
+                    setTimeout(() => alert(`مرحباً بك مجدداً! لقد ربحت ${offlineReward.toFixed(2)} USDT أثناء غيابك في التعدين التلقائي.`), 500);
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        const tg = window.Telegram.WebApp;
+        if (tg && tg.expand) {
+            tg.expand();
+            if (tg.setHeaderColor) tg.setHeaderColor('#0f172a');
+        }
+
+        function saveGame() {
+            game.lastSave = Date.now();
+            localStorage.setItem('crypto_empire_save', JSON.stringify(game));
+            localStorage.setItem('crypto_empire_upgrades', JSON.stringify(upgradesData));
+        }
+
+        function renderUpgrades() {
+            let html = '';
+            upgradesData.forEach(up => {
+                html += `
+                <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl flex justify-between items-center shadow-md">
+                    <div>
+                        <h3 class="font-bold text-sm text-white">${up.name} <span class="text-xs text-emerald-400">(${up.count})</span></h3>
+                        <p class="text-xs text-slate-400 mt-0.5">${up.desc}</p>
+                        <p class="text-xs text-emerald-400 font-bold mt-1">السعر: ${up.cost.toFixed(2)} USDT</p>
+                    </div>
+                    <button onclick="buyUpgrade(${up.id})" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-xs px-4 py-2.5 rounded-xl font-bold shadow transition-transform cursor-pointer">ترقية</button>
+                </div>`;
+            });
+            document.getElementById('upgrades-list').innerHTML = html;
+        }
+
+        function tapAction(event) {
+            if (game.energy < 1) return;
+            game.energy -= 1;
+            game.balance += game.tapPower;
+            
             updateUI();
             showFloatingNumber(event);
+            
+            // Telegram Haptic Feedback if available
+            if (tg && tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
         }
 
         function showFloatingNumber(event) {
             const btn = document.getElementById('tap-btn');
             const rect = btn.getBoundingClientRect();
             const num = document.createElement('div');
-            num.className = 'floating-num';
-            num.innerText = `+${tapPower.toFixed(2)}`;
+            num.className = 'floating-text';
+            num.innerText = `+${game.tapPower.toFixed(0)}`;
             num.style.left = `${event.clientX - rect.left}px`;
             num.style.top = `${event.clientY - rect.top}px`;
             btn.appendChild(num);
-            setTimeout(() => num.remove(), 800);
+            setTimeout(() => num.remove(), 700);
         }
 
         function buyUpgrade(id) {
-            let up = upgrades[id];
-            if (balance >= up.cost) {
-                balance -= up.cost;
-                passiveIncome += up.power;
+            let up = upgradesData[id];
+            if (game.balance >= up.cost) {
+                game.balance -= up.cost;
+                game.passiveIncome += up.power;
+                game.tapPower += 0.2; // Increase click power slightly per upgrade
                 up.count++;
-                up.cost *= 1.4;
-                document.getElementById(`cost-${id}`).innerText = up.cost.toFixed(2);
+                up.cost *= up.mult;
+                
+                renderUpgrades();
                 updateUI();
+                saveGame();
+
+                if (tg && tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            } else {
+                if (tg && tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
             }
         }
 
         function switchTab(tab) {
-            document.getElementById('main-view').classList.add('hidden');
-            document.getElementById('upgrades-view').classList.add('hidden');
-            document.getElementById('friends-view').classList.add('hidden');
+            document.getElementById('view-main').classList.add('hidden');
+            document.getElementById('view-upgrades').classList.add('hidden');
+            document.getElementById('view-quests').classList.add('hidden');
             
-            document.getElementById('nav-main').className = "text-gray-400 flex flex-col items-center";
-            document.getElementById('nav-upgrades').className = "text-gray-400 flex flex-col items-center";
-            document.getElementById('nav-friends').className = "text-gray-400 flex flex-col items-center";
+            document.getElementById('nav-main').className = "text-slate-400 flex flex-col items-center transition-colors";
+            document.getElementById('nav-upgrades').className = "text-slate-400 flex flex-col items-center transition-colors";
+            document.getElementById('nav-quests').className = "text-slate-400 flex flex-col items-center transition-colors";
 
             if (tab === 'main') {
-                document.getElementById('main-view').classList.remove('hidden');
-                document.getElementById('nav-main').className = "text-emerald-400 font-bold flex flex-col items-center";
+                document.getElementById('view-main').classList.remove('hidden');
+                document.getElementById('nav-main').className = "text-emerald-400 font-bold flex flex-col items-center transition-colors";
             } else if (tab === 'upgrades') {
-                document.getElementById('upgrades-view').classList.remove('hidden');
-                document.getElementById('nav-upgrades').className = "text-emerald-400 font-bold flex flex-col items-center";
-            } else if (tab === 'friends') {
-                document.getElementById('friends-view').classList.remove('hidden');
-                document.getElementById('nav-friends').className = "text-emerald-400 font-bold flex flex-col items-center";
+                document.getElementById('view-upgrades').classList.remove('hidden');
+                document.getElementById('nav-upgrades').className = "text-emerald-400 font-bold flex flex-col items-center transition-colors";
+                renderUpgrades();
+            } else if (tab === 'quests') {
+                document.getElementById('view-quests').classList.remove('hidden');
+                document.getElementById('nav-quests').className = "text-emerald-400 font-bold flex flex-col items-center transition-colors";
             }
         }
 
-        function inviteFriend() {
-            const inviteLink = `https://t.me/share/url?url=https://t.me/CryptoEmpireTycoon_bot/game&text=انضم إلي وأسس إمبراطورية الكريبتو الخاصة بك معنا!`;
-            window.open(inviteLink, '_blank');
+        function claimDaily() {
+            game.balance += 50.00;
+            alert("تم استلام مكافأة الدخول اليومي بنجاح (+50 USDT)!");
+            updateUI();
+            saveGame();
         }
 
-        // Game Loop
+        function inviteFriend() {
+            const url = `https://t.me/share/url?url=https://t.me/CryptoEmpireTycoon_bot/game&text=انضم إلي الآن وابدأ في بناء إمبراطوريتك الرقمية معنا!`;
+            window.open(url, '_blank');
+        }
+
+        // Main Game Loop (10 FPS for smoothness & performance)
         setInterval(() => {
-            balance += passiveIncome / 10;
-            if (energy < maxEnergy) {
-                energy = Math.min(maxEnergy, energy + 2);
+            game.balance += game.passiveIncome / 10;
+            if (game.energy < game.maxEnergy) {
+                game.energy = Math.min(game.maxEnergy, game.energy + 1.5);
             }
             updateUI();
         }, 100);
 
+        // Auto Save every 5 seconds
+        setInterval(saveGame, 5000);
+
         function updateUI() {
-            document.getElementById('balance').innerText = `USDT ${balance.toFixed(2)}`;
-            document.getElementById('passive-income').innerText = `+${passiveIncome.toFixed(2)} USDT / ثانية`;
-            document.getElementById('current-energy').innerText = Math.floor(energy);
-            document.getElementById('max-energy').innerText = maxEnergy;
-            document.getElementById('energy-bar').style.width = `${(energy / maxEnergy) * 100}%`;
+            document.getElementById('balance').innerText = `${game.balance.toFixed(2)} USDT`;
+            document.getElementById('passive-income').innerText = `+${game.passiveIncome.toFixed(2)} USDT/s`;
+            document.getElementById('tap-power-label').innerText = `+${game.tapPower.toFixed(1)} نقرة`;
+            document.getElementById('current-energy').innerText = Math.floor(game.energy);
+            document.getElementById('max-energy').innerText = game.maxEnergy;
+            document.getElementById('energy-bar').style.width = `${(game.energy / game.maxEnergy) * 100}%`;
+
+            // Rank progression title
+            let rank = "مبتدئ كربتو";
+            if (game.balance > 1000) rank = "معدن نشط 🥈";
+            if (game.balance > 5000) rank = "مستثمر محترف 🥇";
+            if (game.balance > 25000) rank = "حوت إمبراطورية 🐋";
+            if (game.balance > 100000) rank = "ملك البلوكتشين الماسي 👑";
+            document.getElementById('rank-title').innerText = rank;
         }
+
+        renderUpgrades();
+        updateUI();
     </script>
 </body>
 </html>
