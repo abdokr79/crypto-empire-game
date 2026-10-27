@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CryptoEmpire: Liquidity Tycoon</title>
+    <!-- استدعاء خطوط عصرية ومكتبة الأيقونات والتصميم -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; background-color: #030712; color: #fff; overflow-x: hidden; }
+        .glow-box { box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); }
+        .glow-text { text-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between p-4 select-none">
+
+    <!-- رأس التطبيق: معلومات اللاعب والرصيد -->
+    <header class="flex justify-between items-center bg-gray-900/80 border border-emerald-500/30 p-4 rounded-2xl backdrop-blur-md glow-box">
+        <div>
+            <span class="text-xs text-gray-400 block">إمبراطورية الكريبتو</span>
+            <h1 class="text-lg font-black text-emerald-400 tracking-wider">Tycoon Node</h1>
+        </div>
+        <div class="text-left">
+            <span class="text-xs text-gray-400 block">الرصيد المتاح</span>
+            <span id="balance" class="text-xl font-black text-emerald-300">0.00 USDT</span>
+        </div>
+    </header>
+
+    <!-- مركز اللعبة: قلب الإدمان (زر التوليد والسيولة) -->
+    <main class="flex flex-col items-center justify-center my-auto py-8">
+        <div class="relative mb-8">
+            <!-- دوائر ضوئية متحركة للخلفية -->
+            <div class="absolute inset-0 rounded-full bg-emerald-500/20 blur-2xl animate-pulse"></div>
+            
+            <!-- زر النقر الكبير (مصدر توليد الأرباح) -->
+            <button id="tapButton" class="relative w-48 h-48 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 p-1 shadow-[0_0_50px_rgba(16,185,129,0.4)] active:scale-95 transition-transform duration-100 flex items-center justify-center">
+                <div class="w-full h-full rounded-full bg-gray-950 flex flex-col items-center justify-center border-4 border-emerald-400/50">
+                    <span class="text-3xl mb-1">⚡</span>
+                    <span class="text-sm font-black text-emerald-400 tracking-widest uppercase">اضخ سيولة</span>
+                    <span id="tapPower" class="text-xs text-gray-400 mt-1">+1.00 طاقة</span>
+                </div>
+            </button>
+        </div>
+
+        <!-- مؤشر الدخل السلبي التلقائي -->
+        <div class="bg-gray-900/60 border border-purple-500/30 px-6 py-3 rounded-xl text-center">
+            <span class="text-xs text-gray-400">الدخل السلبي (في الثانية):</span>
+            <span id="passiveIncome" class="text-md font-bold text-purple-400 block">+0.50 USDT / ثانية</span>
+        </div>
+    </main>
+
+    <!-- شريط التنقل السفلي -->
+    <nav class="grid grid-cols-3 gap-2 bg-gray-900/90 border border-gray-800 p-2 rounded-2xl backdrop-blur-md">
+        <button class="py-2.5 bg-emerald-500/20 border border-emerald-500/50 rounded-xl text-emerald-400 text-xs font-bold text-center">الخزينة</button>
+        <button class="py-2.5 bg-gray-800/50 rounded-xl text-gray-400 text-xs font-bold text-center hover:bg-gray-800">الترقيات</button>
+        <button class="py-2.5 bg-gray-800/50 rounded-xl text-gray-400 text-xs font-bold text-center hover:bg-gray-800">الأصدقاء</button>
+    </nav>
+
+    <!-- برمجية تشغيل تفاعل اللعبة (JavaScript المصغر) -->
+    <script>
+        let balance = 12.50;
+        let powerPerTap = 1.00;
+        let passiveRate = 0.50; // ربح كل ثانية
+
+        const balanceEl = document.getElementById('balance');
+        const tapButton = document.getElementById('tapButton');
+
+        // تحديث الرصيد على الشاشة
+        function updateUI() {
+            balanceEl.innerText = balance.toFixed(2) + " USDT";
+        }
+
+        // تفاعل النقر (توليد الأرباح عند الضغط)
+        tapButton.addEventListener('click', () => {
+            balance += powerPerTap;
+            updateUI();
+            
+            // اهتزاز خفيف للهاتف إن كان يدعم ميزة التيليجرام
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+                window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            }
+        });
+
+        // محرك الدخل السلبي (يعمل تلقائياً كل ثانية حتى لو لم يضغط اللاعب)
+        setInterval(() => {
+            balance += passiveRate;
+            updateUI();
+        }, 1000);
+
+        // تهيئة بيئة تيليجرام المصغرة
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
