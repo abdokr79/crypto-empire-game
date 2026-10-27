@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crypto Empire - التصميم الجديد</title>
-    <!-- مكتبة Tailwind -->
+    <title>Crypto Empire - التوسع</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- خطوط جوجل -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-    <!-- سكربت تيليجرام -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #0B0F19; color: white; overflow: hidden; }
+        body { font-family: 'Cairo', sans-serif; background-color: #0B0F19; color: white; overflow: hidden; user-select: none; -webkit-user-select: none; }
         .font-num { font-family: 'Orbitron', sans-serif; }
-        /* تأثير الزجاج */
         .glass-panel {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
@@ -22,89 +18,398 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
-        /* تأثير النيون */
-        .neon-glow { box-shadow: 0 0 15px rgba(34, 211, 238, 0.5); }
-        .neon-text { text-shadow: 0 0 10px rgba(34, 211, 238, 0.7); }
+        .neon-glow { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); transition: box-shadow 0.1s; }
+        .neon-glow:active { box-shadow: 0 0 40px rgba(34, 211, 238, 0.8); transform: scale(0.98); }
+        
+        .floating-text {
+            position: absolute; color: #22d3ee; font-weight: bold; font-family: 'Orbitron', sans-serif; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 50;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+        }
+
+        @keyframes pulse-gift {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(236, 72, 153, 0.9); }
+        }
+        .daily-gift { animation: pulse-gift 2s infinite; }
+        
+        ::-webkit-scrollbar { display: none; }
+        
+        .progress-bar { background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; height: 8px; }
+        .progress-fill { background: linear-gradient(90deg, #06b6d4, #3b82f6); height: 100%; border-radius: 999px; transition: width 0.3s ease; }
     </style>
 </head>
 <body class="h-screen flex flex-col relative">
 
-    <!-- 1. الشريط العلوي (Header) -->
-    <header class="flex justify-between items-center p-4 glass-panel rounded-b-3xl z-10">
+    <!-- الشريط العلوي -->
+    <header class="flex justify-between items-center p-4 glass-panel rounded-b-3xl z-20 relative shrink-0">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-400 to-blue-600 p-[2px]">
                 <div class="w-full h-full bg-[#0B0F19] rounded-full flex items-center justify-center font-bold text-sm">👤</div>
             </div>
             <div>
                 <p class="text-xs text-gray-400">المستوى</p>
-                <p class="text-sm font-bold text-cyan-400 font-num">12</p>
+                <p class="text-sm font-bold text-cyan-400 font-num" id="levelDisplay">1</p>
             </div>
         </div>
         
         <div class="glass-panel px-4 py-1 rounded-full flex items-center gap-2 border-cyan-500/30">
             <span class="text-yellow-400 text-lg">💰</span>
-            <span class="font-num font-bold text-xl neon-text">1,250</span>
+            <span class="font-num font-bold text-xl neon-text" id="balanceDisplay">0</span>
         </div>
     </header>
 
-    <!-- 2. منطقة اللعب (Main Game Area) -->
-    <main class="flex-1 flex items-center justify-center p-4 relative">
-        <!-- مؤثرات خلفية -->
-        <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-purple-600 rounded-full blur-[100px] opacity-30"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-32 h-32 bg-cyan-600 rounded-full blur-[100px] opacity-30"></div>
+    <!-- منطقة المحتوى -->
+    <main class="flex-1 relative overflow-y-auto overflow-x-hidden">
+        
+        <!-- 1. الصفحة الرئيسية -->
+        <div id="page-home" class="absolute inset-0 flex flex-col items-center justify-center p-4 transition-opacity duration-300">
+            <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-purple-600 rounded-full blur-[100px] opacity-30"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-32 h-32 bg-cyan-600 rounded-full blur-[100px] opacity-30"></div>
 
-        <!-- الكارت الزجاجي للعبة -->
-        <div class="glass-panel w-full max-w-sm aspect-square rounded-3xl flex flex-col items-center justify-center relative neon-glow">
-            <!-- هنا توضع اللعبة (Canvas / SVG / Divs) -->
-            <div class="text-center">
-                <div class="text-6xl mb-4 animate-bounce">🚀</div>
-                <h2 class="text-2xl font-bold mb-2">إمبراطورية الكريبتو</h2>
-                <p class="text-sm text-gray-400 px-6">اضغط للبدء بجمع الأرباح وتطوير إمبراطوريتك</p>
-            </div>
-            
-            <!-- زر التفاعل الرئيسي -->
-            <button id="tapBtn" class="mt-6 bg-cyan-500/20 border border-cyan-400 text-cyan-300 px-8 py-3 rounded-xl font-bold hover:bg-cyan-500/30 transition-all active:scale-95">
-                اضغط هنا
+            <button id="dailyGiftBtn" onclick="claimDailyReward()" class="absolute top-4 left-4 z-30 w-14 h-14 bg-pink-600 rounded-full flex items-center justify-center text-3xl daily-gift border-2 border-pink-400 active:scale-90 transition hidden">
+                🎁
             </button>
+
+            <div class="absolute top-4 right-4 text-right z-20 glass-panel p-2 rounded-lg">
+                <p class="text-[10px] text-gray-400">الربح التلقائي</p>
+                <p class="font-num font-bold text-green-400 text-sm" id="passiveDisplay">+0 / ث</p>
+            </div>
+
+            <div id="clickerArea" class="glass-panel w-full max-w-sm aspect-square rounded-full flex flex-col items-center justify-center relative neon-glow cursor-pointer mt-10">
+                <div class="text-center pointer-events-none">
+                    <div id="rocketImage" class="text-8xl mb-4 transition-transform duration-75 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]">🚀</div>
+                    <h2 class="text-2xl font-bold mb-1">إمبراطورية الكريبتو</h2>
+                    <p class="text-xs text-cyan-400 font-num" id="tapPowerDisplay">+1 / نقرة</p>
+                </div>
+            </div>
         </div>
+
+        <!-- 2. صفحة المهام -->
+        <div id="page-quests" class="hidden absolute inset-0 p-4 pb-24">
+            <h2 class="text-2xl font-bold text-center mb-6 mt-4 text-pink-400">المهام اليومية 📋</h2>
+            <div id="questsList" class="flex flex-col gap-4"></div>
+        </div>
+
+        <!-- 3. صفحة الترقيات -->
+        <div id="page-upgrades" class="hidden absolute inset-0 p-4 pb-24">
+            <h2 class="text-2xl font-bold text-center mb-6 mt-4 text-cyan-400">مركز التطوير 🛠️</h2>
+            <div id="upgradesList" class="flex flex-col gap-4"></div>
+        </div>
+
+        <!-- 4. صفحة الأصدقاء والمتصدرين (الجديدة) -->
+        <div id="page-social" class="hidden absolute inset-0 p-4 pb-24 flex flex-col gap-6">
+            <h2 class="text-2xl font-bold text-center mt-4 text-yellow-400">التوسع الإمبراطوري 🤝</h2>
+            
+            <!-- نظام الإحالة -->
+            <div class="glass-panel p-5 rounded-2xl flex flex-col items-center text-center gap-3 border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.1)]">
+                <span class="text-4xl">🔗</span>
+                <h3 class="font-bold text-lg text-yellow-300">دعوة الأصدقاء</h3>
+                <p class="text-xs text-gray-400">ادعُ أصدقاءك واحصل على <span class="text-yellow-400 font-bold">10,000 عملة</span> فوراً + <span class="text-yellow-400 font-bold">10%</span> من أرباحهم مدى الحياة!</p>
+                <button onclick="inviteFriend()" class="mt-2 w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold py-3 rounded-xl active:scale-95 transition hover:opacity-90">
+                    دعوة صديق الآن
+                </button>
+            </div>
+
+            <!-- لوحة المتصدرين -->
+            <div class="glass-panel p-4 rounded-2xl">
+                <h3 class="font-bold text-sm text-cyan-300 mb-3 flex items-center gap-2">
+                    <span>🏆</span> أفضل 5 لاعبين (Top Players)
+                </h3>
+                <div class="flex flex-col gap-2">
+                    <!-- يتم توليدهم عبر JS -->
+                    <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                        <div class="flex items-center gap-2"><span class="text-yellow-400 font-bold">1</span> <span class="text-sm">Satoshi_Nakamoto</span></div>
+                        <span class="font-num text-xs text-cyan-400">9.5M</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                        <div class="flex items-center gap-2"><span class="text-gray-300 font-bold">2</span> <span class="text-sm">CryptoKing</span></div>
+                        <span class="font-num text-xs text-cyan-400">7.2M</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                        <div class="flex items-center gap-2"><span class="text-orange-400 font-bold">3</span> <span class="text-sm">Whale_01</span></div>
+                        <span class="font-num text-xs text-cyan-400">5.1M</span>
+                    </div>
+                     <!-- اللاعب الحالي -->
+                    <div class="flex justify-between items-center bg-cyan-900/40 border border-cyan-500/30 p-2 rounded-lg mt-1">
+                        <div class="flex items-center gap-2"><span class="text-cyan-400 font-bold">#</span> <span class="text-sm font-bold">أنت</span></div>
+                        <span class="font-num text-xs text-cyan-400" id="myRankScore">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <!-- 3. شريط التنقل السفلي (Bottom Nav) -->
-    <nav class="glass-panel rounded-t-3xl p-2 flex justify-around items-center z-10 pb-6">
-        <button class="flex flex-col items-center p-2 text-cyan-400">
+    <!-- شريط التنقل السفلي -->
+    <nav class="glass-panel rounded-t-3xl p-2 flex justify-around items-center z-20 pb-6 shrink-0 relative">
+        <button onclick="switchTab('page-home', this)" class="nav-btn flex flex-col items-center p-2 text-cyan-400 transition-colors">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             <span class="text-[10px] font-bold">الرئيسية</span>
         </button>
         
-        <button class="flex flex-col items-center p-2 text-gray-500 hover:text-gray-300 transition">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-            <span class="text-[10px] font-bold">المتجر</span>
+        <button onclick="switchTab('page-quests', this)" class="nav-btn flex flex-col items-center p-2 text-gray-500 transition-colors">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            <span class="text-[10px] font-bold">المهام</span>
         </button>
         
-        <button class="flex flex-col items-center p-2 text-gray-500 hover:text-gray-300 transition">
+        <button onclick="switchTab('page-upgrades', this)" class="nav-btn flex flex-col items-center p-2 text-gray-500 transition-colors">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             <span class="text-[10px] font-bold">الترقيات</span>
         </button>
         
-        <button class="flex flex-col items-center p-2 text-gray-500 hover:text-gray-300 transition">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            <span class="text-[10px] font-bold">حسابي</span>
+        <button onclick="switchTab('page-social', this)" class="nav-btn flex flex-col items-center p-2 text-gray-500 transition-colors">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span class="text-[10px] font-bold">الأصدقاء</span>
         </button>
     </nav>
 
     <script>
-        // تفعيل وضع تيليجرام (يجعل الخلفية متوافقة مع ثيم التطبيق)
         const tg = window.Telegram.WebApp;
         tg.expand(); 
         tg.setHeaderColor('#0B0F19');
         tg.setBackgroundColor('#0B0F19');
 
-        // تأثير الاهتزاز عند الضغط على الزر (Haptic Feedback)
-        document.getElementById('tapBtn').addEventListener('click', () => {
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('medium');
+        let gameState = {
+            coins: 0,
+            level: 1,
+            tapLevel: 1,
+            autoLevel: 0,
+            tapPower: 1,
+            passiveIncome: 0,
+            lastRewardTime: 0,
+            quests: {
+                tap100: { progress: 0, target: 100, reward: 500, claimed: false, title: "المتدرب", desc: "اضغط 100 مرة" },
+                buy3: { progress: 0, target: 3, reward: 1000, claimed: false, title: "المستثمر", desc: "اشترِ 3 ترقيات" },
+                idle5k: { progress: 0, target: 5000, reward: 2000, claimed: false, title: "صاحب الإمبراطورية", desc: "اجمع 5000 عملة من الربح التلقائي" }
             }
+        };
+
+        const upgradeConfig = {
+            tap: { baseCost: 50, multiplier: 1.15 },
+            auto: { baseCost: 150, multiplier: 1.20 }
+        };
+
+        function getUpgradeCost(type) {
+            const config = upgradeConfig[type];
+            const level = type === 'tap' ? gameState.tapLevel : gameState.autoLevel;
+            return Math.floor(config.baseCost * Math.pow(config.multiplier, level));
+        }
+
+        function updateUI() {
+            document.getElementById('balanceDisplay').innerText = Math.floor(gameState.coins).toLocaleString('en-US');
+            document.getElementById('myRankScore').innerText = Math.floor(gameState.coins).toLocaleString('en-US');
+            
+            let newLevel = Math.floor(gameState.coins / 5000) + 1;
+            if (newLevel > gameState.level) {
+                gameState.level = newLevel;
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+            document.getElementById('levelDisplay').innerText = gameState.level;
+
+            gameState.tapPower = gameState.tapLevel; 
+            gameState.passiveIncome = gameState.autoLevel;
+
+            document.getElementById('tapPowerDisplay').innerText = `+${gameState.tapPower} / نقرة`;
+            document.getElementById('passiveDisplay').innerText = `+${gameState.passiveIncome} / ث`;
+
+            renderUpgrades();
+            renderQuests();
+            checkDailyReward();
+        }
+
+        // --- نظام الإحالة (Referrals) ---
+        function inviteFriend() {
+            // في تيليجرام، يمكننا جلب معرف المستخدم من initData
+            let userId = "123456"; // قيمة افتراضية للمحاكاة
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                userId = tg.initDataUnsafe.user.id;
+            }
+            
+            const botUsername = "YourBotUsername"; // ضع اسم بوتك هنا لاحقاً
+            const refLink = `https://t.me/${botUsername}?start=ref_${userId}`;
+            
+            // محاكاة إعطاء المكافأة عند الدعوة (في الواقع، السيرفر هو من يتحقق من ذلك)
+            gameState.coins += 10000;
+            updateUI();
+            saveGame();
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            
+            // فتح نافذة مشاركة تيليجرام
+            const text = "انضم إلي في لعبة إمبراطورية الكريبتو واربح المال الحقيقي! 🚀💰";
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`);
+        }
+
+        // --- الهدية اليومية والمهام والترقيات (كما في السابق) ---
+        function checkDailyReward() {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            const btn = document.getElementById('dailyGiftBtn');
+            if (now - gameState.lastRewardTime > oneDay) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+
+        function claimDailyReward() {
+            const now = Date.now();
+            gameState.lastRewardTime = now;
+            const reward = 5000 + (gameState.level * 1000);
+            gameState.coins += reward;
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            const btn = document.getElementById('dailyGiftBtn');
+            showFloatingText(btn.getBoundingClientRect().left, btn.getBoundingClientRect().top, `+${reward} 🎁`);
+            updateUI();
+            saveGame();
+        }
+
+        function renderQuests() {
+            const list = document.getElementById('questsList');
+            list.innerHTML = '';
+            for (const key in gameState.quests) {
+                const q = gameState.quests[key];
+                const progressPercent = Math.min((q.progress / q.target) * 100, 100);
+                const isComplete = q.progress >= q.target;
+                let btnHTML = '';
+                if (q.claimed) {
+                    btnHTML = `<button class="bg-gray-700 text-gray-400 text-xs font-bold py-2 px-4 rounded-xl cursor-not-allowed">تم الاستلام</button>`;
+                } else if (isComplete) {
+                    btnHTML = `<button onclick="claimQuest('${key}')" class="bg-green-600 hover:bg-green-500 text-white text-xs font-bold py-2 px-4 rounded-xl active:scale-95 transition shadow-[0_0_15px_rgba(34,197,94,0.5)]">استلام</button>`;
+                } else {
+                    btnHTML = `<button class="bg-cyan-600/50 text-white text-xs font-bold py-2 px-4 rounded-xl cursor-not-allowed">${q.reward} 💰</button>`;
+                }
+                list.innerHTML += `
+                    <div class="glass-panel p-4 rounded-2xl flex flex-col gap-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-sm text-cyan-300">${q.title}</h3>
+                                <p class="text-xs text-gray-400">${q.desc}</p>
+                            </div>
+                            ${btnHTML}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="progress-bar flex-1"><div class="progress-fill" style="width: ${progressPercent}%"></div></div>
+                            <span class="text-[10px] font-num text-gray-400">${Math.min(q.progress, q.target)}/${q.target}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function claimQuest(questId) {
+            const q = gameState.quests[questId];
+            if (q.progress >= q.target && !q.claimed) {
+                q.claimed = true;
+                gameState.coins += q.reward;
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                updateUI();
+                saveGame();
+            }
+        }
+
+        function renderUpgrades() {
+            const list = document.getElementById('upgradesList');
+            list.innerHTML = '';
+            const tapCost = getUpgradeCost('tap');
+            const canAffordTap = gameState.coins >= tapCost;
+            list.innerHTML += `
+                <div class="glass-panel p-4 rounded-2xl flex justify-between items-center ${canAffordTap ? '' : 'opacity-50 grayscale'}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center text-2xl">👆</div>
+                        <div><h3 class="font-bold text-sm">قوة النقر</h3><p class="text-xs text-gray-400">المستوى ${gameState.tapLevel}</p></div>
+                    </div>
+                    <button onclick="buyUpgrade('tap')" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold py-2 px-4 rounded-xl active:scale-95 transition">${tapCost} 💰</button>
+                </div>
+            `;
+            const autoCost = getUpgradeCost('auto');
+            const canAffordAuto = gameState.coins >= autoCost;
+            list.innerHTML += `
+                <div class="glass-panel p-4 rounded-2xl flex justify-between items-center ${canAffordAuto ? '' : 'opacity-50 grayscale'}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center text-2xl">🤖</div>
+                        <div><h3 class="font-bold text-sm">روبوت التعدين</h3><p class="text-xs text-gray-400">المستوى ${gameState.autoLevel}</p></div>
+                    </div>
+                    <button onclick="buyUpgrade('auto')" class="bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold py-2 px-4 rounded-xl active:scale-95 transition">${autoCost} 💰</button>
+                </div>
+            `;
+        }
+
+        function buyUpgrade(type) {
+            const cost = getUpgradeCost(type);
+            if (gameState.coins >= cost) {
+                gameState.coins -= cost;
+                if (type === 'tap') gameState.tapLevel++;
+                if (type === 'auto') gameState.autoLevel++;
+                if (gameState.quests.buy3.progress < gameState.quests.buy3.target) gameState.quests.buy3.progress++;
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                updateUI();
+                saveGame();
+            } else {
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            }
+        }
+
+        function switchTab(pageId, btn) {
+            document.getElementById('page-home').classList.add('hidden');
+            document.getElementById('page-quests').classList.add('hidden');
+            document.getElementById('page-upgrades').classList.add('hidden');
+            document.getElementById('page-social').classList.add('hidden');
+            
+            document.getElementById(pageId).classList.remove('hidden');
+
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(b => { b.classList.remove('text-cyan-400'); b.classList.add('text-gray-500'); });
+            btn.classList.remove('text-gray-500');
+            btn.classList.add('text-cyan-400');
+
+            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+
+        const clickerArea = document.getElementById('clickerArea');
+        const rocketImage = document.getElementById('rocketImage');
+
+        clickerArea.addEventListener('pointerdown', (e) => {
+            gameState.coins += gameState.tapPower;
+            if (gameState.quests.tap100.progress < gameState.quests.tap100.target) gameState.quests.tap100.progress++;
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            rocketImage.style.transform = 'scale(0.85)';
+            setTimeout(() => { rocketImage.style.transform = 'scale(1)'; }, 100);
+            showFloatingText(e.clientX, e.clientY, `+${gameState.tapPower}`);
+            updateUI();
         });
+
+        function showFloatingText(x, y, text) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.innerText = text;
+            el.style.left = `${x - 15}px`;
+            el.style.top = `${y - 30}px`;
+            document.body.appendChild(el);
+            setTimeout(() => { el.remove(); }, 800);
+        }
+
+        setInterval(() => {
+            if (gameState.passiveIncome > 0) {
+                gameState.coins += gameState.passiveIncome;
+                if (gameState.quests.idle5k.progress < gameState.quests.idle5k.target) gameState.quests.idle5k.progress += gameState.passiveIncome;
+                updateUI();
+            }
+        }, 1000);
+
+        function saveGame() { localStorage.setItem('cryptoEmpireDataV4', JSON.stringify(gameState)); }
+        function loadGame() {
+            const savedData = localStorage.getItem('cryptoEmpireDataV4');
+            if (savedData) gameState = { ...gameState, ...JSON.parse(savedData) };
+            updateUI();
+        }
+
+        setInterval(saveGame, 5000);
+        window.addEventListener('beforeunload', saveGame);
+        loadGame();
     </script>
 </body>
 </html>
